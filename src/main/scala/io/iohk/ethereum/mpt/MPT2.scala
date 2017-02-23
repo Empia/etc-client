@@ -10,10 +10,12 @@ object MPT2 {
 
   case class MPTException(message: String) extends RuntimeException(message)
 
+  // TODO to be removed. Use MPTUpdate instead
   private case class NodeInsertResult(newNode: Node,
                                       toDeleteFromStorage: Seq[Node] = Seq(),
                                       toUpdateInStorage: Seq[Node] = Seq())
 
+  // TODO to be removed. Use MPTUpdate instead
   private case class NodeRemoveResult(hasChanged: Boolean, newNode: Option[Node],
                                       toDeleteFromStorage: Seq[Node] = Seq(),
                                       toUpdateInStorage: Seq[Node] = Seq())
