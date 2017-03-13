@@ -2,9 +2,8 @@ package io.iohk.ethereum.db.dataSource
 
 import java.io.File
 
-import io.iohk.ethereum.utils.Config
-import org.iq80.leveldb.{DB, Options, WriteOptions}
-import org.iq80.leveldb.impl.{Iq80DBFactory, WriteBatchImpl}
+import org.fusesource.leveldbjni.JniDBFactory
+import org.iq80.leveldb.{DB, DBFactory, Options, WriteOptions}
 
 
 class LevelDBDataSource(
@@ -62,7 +61,7 @@ class LevelDBDataSource(
     try {
       close()
     } finally {
-      Iq80DBFactory.factory.destroy(new File(levelDbConfig.path), null) // Options are not being used ¯\_(ツ)_/¯
+      JniDBFactory.factory.destroy(new File(levelDbConfig.path), LevelDBDataSource.createOptions(levelDbConfig)) // Options are not being used ¯\_(ツ)_/¯
     }
   }
 }
@@ -77,15 +76,20 @@ trait LevelDbConfig {
 
 object LevelDBDataSource {
 
-  private def createDB(levelDbConfig: LevelDbConfig): DB = {
+  private def createOptions(levelDbConfig: LevelDbConfig): Options = {
     import levelDbConfig._
-
-    val options = new Options()
+    new Options()
       .createIfMissing(createIfMissing)
       .paranoidChecks(paranoidChecks) // raise an error as soon as it detects an internal corruption
       .verifyChecksums(verifyChecksums) // force checksum verification of all data that is read from the file system on behalf of a particular read
       .cacheSize(cacheSize)
-    Iq80DBFactory.factory.open(new File(path), options)
+  }
+
+  private def createDB(levelDbConfig: LevelDbConfig): DB = {
+    val options = createOptions(levelDbConfig)
+    val file = new File(levelDbConfig.path)
+    file.mkdirs()
+    JniDBFactory.factory.open(file, options)
   }
 
   def apply(levelDbConfig: LevelDbConfig): LevelDBDataSource = {
