@@ -1,0 +1,3 @@
+## Welcome to the etc-client wiki!
+
+A miscellaneous collection of notes developers found worth recording... 
